@@ -1,0 +1,20 @@
+LoadModule python_module modules/mod_python.so
+
+<Directory /home/dbiapp/www/htdocs>
+        AddHandler mod_python .py
+        PythonHandler handler
+        PythonOption mod_python.file_session.database_directory /home/dbiapp/www/tmp
+        PythonDebug on
+</Directory>
+
+<Location /QE>
+        PythonOption ApplicationPath /QE
+        PythonPath "['/home/dbiapp/www/htdocs/QE'] + sys.path"
+</Location>
+
+<Location /QE/D0>
+        SetEnv QENGINE_CFG /home/dbiapp/www/htdocs/QE/cfg/d0.cfg
+</Location>
+
+
+

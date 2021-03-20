@@ -1,0 +1,129 @@
+{% extends "BrowserBasicTemplate.html" %}
+
+{% block top %}
+    {% if title %}
+        <h2>{{title}}</h2>
+    {% endif %}
+    
+    <div style="float:left; clear:left">
+        <p>
+            {% if link %}
+                <a href="{{link}}">Link to this data</a><br/>
+            {% endif %}
+            CSV:&nbsp;<a href="{{csv_commas_link}}">commas</a>&nbsp;<a href="{{csv_tabs_link}}">tabs</a>
+        </p>
+        {% if debug %}
+            <p>Link: {{link}}</p>
+        {% endif %}
+        {% if show_edit %}
+            <form action="./edit" method="post">
+                <input type="hidden" name="dbname" value="{{dbname}}"/>
+                <input type="hidden" name="sql_statement" value="{{sql}}"/>
+                <input type="hidden" name="title" value="{{title}}"/>
+                <input type="hidden" name="maxrows" value="{{maxrows}}"/>
+                <input type="hidden" name="pagerows" value="{{pagerows}}"/>
+                {% if drill_down_field %}
+                    <input type="hidden" name="drill_down_field"
+                                        value="{{drill_down_field}}"/>
+                    <input type="hidden" name="drill_baggage" value="{{drill_baggage}}"/>
+                    <input type="hidden" name="drill_wheres" value="{{drill_wheres}}"/>
+                    <input type="hidden" name="drill_from_field"
+                                        value="{{drill_from_field}}"/>
+                    <input type="hidden" name="drill_arg"
+                                        value="{{drill_arg}}"/>
+                {% endif %}
+                <input type="submit" value="Edit"> SQL query that produced this page
+            </form>
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+
+{% block main %}
+
+    {% if drill_down_field %}
+        <form id="drill_down_form" action="./run" method="POST">
+        
+            <input type="hidden" name="drill_arg" value=""/>
+            <input type="hidden" name="dbname" value="{{dbname}}"/>
+
+            <!-- drill bag {{drill_bag_name}} -->
+            
+            {{ drill_bag }}
+            
+            <!-- end of drill bag {{drill_bag_name}} -->
+            
+            {% if drill_wheres %}
+                <input type="hidden" name="wheres" value="{{drill_wheres}}"/>
+            {% endif %}
+        </form>
+        
+        <script type="text/javascript">
+            function sdf(arg)
+            {
+                var f = document.getElementById("drill_down_form");
+                f.drill_arg.value = arg;
+                f.submit();
+            }
+        </script>
+    {% endif %}
+
+
+        <!-- page:{{page}} prevpage:{{prevpage}} nextpage:{{nextpage}} -->
+
+    <p>
+            {% if not prevpage is none -%}
+                <a style="margin:2px 0px" href="./show_data?page={{prevpage}}&output_type={{output_type}}">&lt;prev</a>
+            {%- endif -%}
+            &nbsp;&nbsp;Page {{page+1}}/{{npages}}&nbsp;&nbsp;
+            {%- if not nextpage is none -%}
+                <a style="margin:2px 0px" href="./show_data?page={{nextpage}}&output_type={{output_type}}">next&gt;</a>
+            {%- endif %}
+    </p>
+
+    <table width="100%">
+        <tr>
+            <td colspan=3>
+                <table class="formtable" cellspacing=4 cellpadding=2 border=0 width="100%">
+                    {% for d in data %}
+                        {% for x in d %}
+                            <tr><th>{{x.col}}:</th>
+                                <td>{% if x.val is none %}(null){% else -%}
+                                    {% if drill_down_field == x.col %}
+                                        <a href="javascript:sdf('{{x.val}}')">{{x.val}}</a>
+                                    {% else %}
+                                        {{x.val}}
+                                    {% endif %}
+                                {% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                        {{ '<tr><td class=separator colspan=2></td></tr>' if not loop.last }}
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+    </table>
+    {% if data|length > 20 %}
+        <p>
+        {% if not prevpage is none -%}
+            <a style="margin:2px 0px" href="./show_data?page={{prevpage}}">&lt;prev</a>
+        {%- endif -%}
+        &nbsp;&nbsp;Page {{page+1}}/{{npages}}&nbsp;&nbsp;
+        {%- if not nextpage is none -%}
+            <a style="margin:2px 0px" href="./show_data?page={{nextpage}}">next&gt;</a>
+        {%- endif %}
+        </p>
+    {% endif %}
+        
+    {% if show_sql %}
+    <div style="clear:left; float:left; margin:10px 3px 0px 0px">Executed SQL statement:</div>
+    <div class="sql" style="float:left; clear:left">
+        <pre>
+            {{sql}}
+        </pre>
+    </div>
+    {% endif %}
+    
+
+{% endblock %}

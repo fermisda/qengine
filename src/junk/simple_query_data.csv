@@ -1,0 +1,9 @@
+{% for c in columns -%}
+{{c}}{{-',' if not loop.last -}}
+{%- endfor %}
+{% for d in data -%}
+{%- for x in d -%}
+{%- if x is none %}{% else %}{{x}}{% endif %}
+    {{-',' if not loop.last -}}
+{%- endfor %}{{'\n'}}
+{%- endfor %}

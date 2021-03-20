@@ -1,0 +1,43 @@
+{% extends "BrowserBasicTemplate.html" %}
+
+{% block top %}
+    <h2>{{title}}</h2>
+{% endblock %}
+
+{% block main %}
+
+    <form   action="{{action}}" method="POST">
+        <input type="hidden" name="dbname" value="{{dbname}}"/>
+        <table cellpadding=5>
+            <tr>
+                <td align="right" valign="top">Enter SQL statement:</td>
+                <td align="left" valign="top">
+                    <textarea name="sql_statement" rows=20 cols=60>{{sql}}</textarea><br/>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" valign="top">Output format:</td>
+                <td align="left" valign="top"><select name="output_type">
+                    <option value="HTML">HTML</option>
+                    <option value="text">CSV(tabs)</option>
+                    <option value="text,">CSV(commas)</option>
+                    </select>
+                </td>
+            </tr>
+            <tr><td align="right" valign="top">Number of output rows:</td>
+                <td><input type="text" value="{{maxrows}}" name="maxrows"/></td>
+            </tr>
+            <tr><td align="right" valign="top">Number of rows per page:</td>
+                <td><input type="text" value="{{pagerows}}" name="pagerows"/>&nbsp;(ignored for CSV output)</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td align="left"><input name="submit" type="submit" value="Run"/>
+                </td>
+            </tr>
+        </table>
+        <!-- Max rows to retrieve: <input type="text" value="{{maxrows}}" name="maxrows"/><br/> -->
+    </form>
+
+{% endblock %}
+

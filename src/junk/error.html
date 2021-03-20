@@ -1,0 +1,25 @@
+{% extends "BrowserBasicTemplate.html" %}
+
+{% block main %}
+
+<dl>
+    <dt>Error</dt>
+    <dd>{{error}}
+    </dd>
+    
+    <dt>SQL statement</dt>
+    <dd>
+        {{sql}}
+    </dd>
+
+    <dt>Query parameters</dt>
+    <dd>
+        <table cellpadding=5 cellspacing=2>
+            {% for k, v in qdict %}
+                <tr><td valign=top>{{k}}:</td><td>{{v}}</td></tr>
+            {% endfor %}
+        </table>
+    </dd>
+</dl>
+    
+{% endblock %}

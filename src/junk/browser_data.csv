@@ -1,0 +1,7 @@
+{% for n in cols -%}
+{{n}},
+{%- endfor %}{{'\r\n'}}
+{%- for d in data -%}
+{%- for x in d -%}
+{%- if x.val is none %}{% else %}{{x.val}}{% endif %},{% endfor %}{{'\r\n'}}
+{%- endfor %}

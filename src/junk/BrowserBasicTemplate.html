@@ -1,0 +1,28 @@
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" 
+		href="{{GLOBAL_AppDirPath}}/stylesheet.css"/>
+
+</head>
+<body>
+    <table cellspacing="5px" width="100%">
+        <tr>
+            <td id="banner" colspan="2"  height="0%">
+                {% block top %}{% endblock %}
+            </td>  <!-- banner -->
+        </tr>
+        <tr id="main" colspan=2>
+            <td>{% block main %}{% endblock %}</td>
+        </tr>  <!-- middle -->
+        <tr>
+            <td id="bottom" colspan="2">
+            {% block trailer %}{% endblock %}
+            </td>
+        </tr>
+    </table>
+    <div style="float:right;"><i>QEngine version: {{GLOBAL_GUI_Version}}</i></div>
+</body>
+<!-- script: {{AppTopPath}} -->
+<!-- dir: {{AppDirPath}} -->
+<!-- Error: {{Error}} -->
+</html>

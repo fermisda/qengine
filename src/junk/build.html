@@ -1,0 +1,153 @@
+{% extends "BrowserBasicTemplate.html" %}
+
+{% block top %}
+    <h2>{{title}}</h2>
+{% endblock %}
+
+{% block main %}
+
+    <form   action="./run" method="POST">
+        <input type="hidden" name="dbname" value="{{dbname}}"/>
+        <input type="hidden" name="tables" value="{{ ','.join(tables) }}"/> 
+        <input type="hidden" name="namespace" value="{{namespace}}"/>
+        
+        {% if columns %}
+            <h2>Output columns</h2>
+            <hr/>
+            <textarea name="columns" cols=60 rows=5>{{columns}}</textarea>
+        {% else %}
+            {% for table, alias, clist in table_columns %}
+                <h2>Output columns for table {{table}} {{alias}}</h2>
+                <hr/>
+                <table cellpadding=5>
+                        {% for c, t in clist %}
+                            {{ loop.cycle('<tr>','','','','') }}
+                            <td><input type=checkbox name=columns value="{{alias or table}}.{{c}}"/>{{c}}</td>
+                            {% if loop.last %}
+                                </tr>
+                            {% else %}
+                                {{ loop.cycle('','','','','</tr>') }}
+                            {% endif %}
+                        {% endfor %}
+                </table>
+            {% endfor %}
+        {% endif %}
+
+        {% if wheres %}
+            <h2>Query options</h2>
+            <hr/>
+            <textarea name="wheres" cols=60 rows=5>{{wheres}}</textarea>
+        {% else %}
+            {% for table, alias, clist in table_columns %}
+
+                <h2>Query options for {{table}} {{alias}}</h2>
+                <hr/>
+
+
+                <table cellpadding=5>
+                    {% for i in range(numWheres) %}
+                        <tr>
+                            <td>
+                                <select name="wheres_column_{{table}}_{{i}}"/>
+                                    <option value="" selected=selected>Choose One</option> 
+                                    {% for c,t  in clist %}
+                                        <option value="{{alias or table}}.{{c}}">{{alias or table}}.{{c}}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="wheres_logic_{{table}}_{{i}}">
+                                    <option value="like">like</option>
+                                    <option value="not like">not like</option>
+                                    <option value="=">=</option>
+                                    <option value="!=">!=</option>
+                                    <option value="&gt;">&gt;</option>
+                                    <option value="&gt;=">&gt;=</option>
+                                    <option value="&lt;">&lt;</option>
+                                    <option value="&lt;=">&lt;=</option>
+                                    <option value="is null">is null</option>
+                                    <option value="is not null">is not null</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input name="wheres_value_{{table}}_{{i}}" type="text"/>
+                            </td>
+                            <td>
+                                <select name="wheres_function_{{table}}_{{i}}">
+                                    <option value=""></option>
+                                    <option value="upper">upper</option>
+                                    <option value="lower">lower</option>
+                                    <option value="initcap">initcap</option>
+                                    <option value="to_date">to_date</option>
+                                </select>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            {% endfor %}
+            <hr/>
+            Combine query options with <select name=wheres_bool>
+                <option value='and' selected=selected>and</option>
+                <option value='or'>or</option>
+            </select> logic
+        {% endif %}
+                
+        
+        <h2>Sort Order Options</h2>
+        <hr/>
+        
+        {% if orders %}
+            <textarea name="orders" cols=60 rows=5>{{orders}}</textarea>
+        {% else %}
+            <table cellpadding=5>
+                {% for i in range(numSorts) %}
+                    <tr>
+                        <td>
+                            <select name="orders{{i}}"/>
+                                <option value="" selected=selected>Sort Order</option> 
+                                {% for table, alias, clist in table_columns %}
+                                    {% for c,t  in clist %}
+                                        <option value="{{alias or table}}.{{c}}">{{alias or table}}.{{c}}</option>
+                                    {% endfor %}
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select name="orders_desc{{i}}">
+                                <option value="" selected=selected>ascending</option>
+                                <option value="desc">descending</option>
+                            </select>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+        
+                            
+                            
+        <hr/>                      
+
+        <table cellpadding=5>
+            <tr>
+                <td align="right" valign="top">Number of output rows:</td>
+                <td><input type=text name=maxrows value="{{maxrows or 1000}}"/></td>
+            </tr>
+            <tr>
+                <td align="right" valign="top">Number of rows per page:</td>
+                <td><input type=text name=pagerows value="{{pagerows or 200}}"/></td>
+            </tr>
+        </table>
+        <input type=submit value="Run"/>
+                        
+        
+    </form>
+
+<!--
+    tables: {{tables}}
+    table_list: {{table_list}}
+    table_columns: {{table_columns}}
+-->
+
+{% endblock %}
+

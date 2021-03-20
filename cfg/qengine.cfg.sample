@@ -1,0 +1,16 @@
+[Global]
+databases = Minerva d0sam
+default_db = d0sam
+
+[d0sam]
+type = Oracle
+tns = d0ofprd1
+read_user = samread
+read_password = reader
+
+[minervasam]
+type = Oracle
+tns = minerprd
+read_user = samread
+read_password = reader
+

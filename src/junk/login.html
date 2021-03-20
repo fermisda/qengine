@@ -1,0 +1,43 @@
+{% extends "BrowserBasicTemplate.html" %}
+
+{% block middle_row %}
+
+<td height="100%" valign="top">
+    {% if Error or Warning or Note %}
+        <div id="messages" style="clear:both;">
+            {% if Error %} <p width="0px" class="error">{{Error}}</p> {% endif %}
+            {% if Warning %} <p class="warning">{{Warning}}</p> {% endif %}
+            {% if Note %} <p class="note">{{Note}}</p> {% endif %}
+        </div>  <!-- messages -->
+    {% endif %}
+    
+    <div style="clear:both;">
+        <form action="./login_action" method="post">
+            <table>
+                <tr>
+                    <td>Database:</td>
+                    <td><select name="dbname">
+                        {% for db in dbnames %}
+                            <option value="{{db.id}}">{{db.id}} -- {{db.type}}</option>
+                        {% endfor %}
+                    </td>
+                </tr> 
+                <tr>
+                    <td align="right">Username:</td>
+                    <td><input type="text" name="user"/></td>
+                </tr>
+                <tr>
+                    <td align="right">Password:</td>
+                    <td><input type="password" name="password"/></td>
+                </tr>
+                <tr>
+                    <td colspan=2>
+                        <input type="submit" value="Login"/>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</td>
+
+{% endblock %}
