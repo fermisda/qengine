@@ -1,1 +1,1 @@
-from .SQEngineApp import application
+from .SQEngineApp import create_application

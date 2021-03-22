@@ -42,12 +42,10 @@ class SimpleQueryHandler(SQBaseHandler):
     }
 
     @webmethod()
-    @add_data_origin        
     def version(self, req, relpath, **args):
         return Response(self.App.Version, content_type="text/plain")
         
     @webmethod()
-    @add_data_origin        
     def env(self, req, relpath, **args):
         text = ''.join(["%s = %s\n" % (k, v) for k, v in sorted(req.environ.items())])
         return Response(text, content_type="text/plain")
@@ -125,8 +123,22 @@ class SimpleQueryHandler(SQBaseHandler):
         sql = str(sql)
         return sql, aliases   
 
+    
+
     @webmethod()
-    @add_data_origin        
+    def probe(self, req, relpath, dbname=None, **args):
+        conn = self.App.connect(dbname)
+        c = conn.cursor()
+        c.execute("select 1")
+        tup = c.fetchone()
+        if tup and tup[0] == 1:
+            return "OK"
+        else:
+            return 500
+        
+
+
+    @webmethod()
     def query(self, req, relpath, dbname=None, x='no', f='csv', t=None, F=None, cache_ttl=None, **args):
         # args:
         # dbname - optional
@@ -185,7 +197,6 @@ class SimpleQueryHandler(SQBaseHandler):
         return resp            
         
     @webmethod()
-    @add_data_origin        
     def flush(self, req, relpath, **args):
         self.App.clear_cache()
         return Response("OK")

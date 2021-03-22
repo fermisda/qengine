@@ -22,21 +22,25 @@ class SQEngineApp(WPApp):
     Version = Version
     #COOKIE_PATH = "/QE"
 
-    def __init__(self, root_class):
-        WPApp.__init__(self, root_class)
+    def __init__(self, *params, config=None, **args):
+        WPApp.__init__(self, *params, **args)
         self.PostgresPools = {}      # connection string -> connection pool
         self.Debug = False
-        self.Cfg = None
-        self.Debug = False
-        self.UseCache = False
         self.RequestCache = LRUCache(10, ttl=3600)
+        self.Cfg = None
+        self.UseCache = False
 
-    def init(self):
-        self.Cfg = QEConfigFile(self.environ("QENGINE_CFG"))
+        config = config or os.environ["QENGINE_CFG"]
+
+        self.Cfg = QEConfigFile(config)
         self.Debug = self.Cfg.Debug
         self.UseCache = self.Cfg.UseCache
 
+
         
+    def init(self):
+        pass
+
     @app_synchronized
     def get_cache(self, key):
         return self.RequestCache[key]
@@ -94,7 +98,6 @@ class SQEngineApp(WPApp):
                     db=dbparams["dbname"], user=dbparams["user"],
                     passwd=dbparams["password"])
         return conn
-    
 
     def defaultDB(self):
         return self.Cfg.defaultDatabaseName
@@ -103,4 +106,8 @@ class SQEngineApp(WPApp):
         return self.Cfg.cacheTTL(dbname, table)
         
     
-application = SQEngineApp(SimpleQueryHandler)
+#application = SQEngineApp(SimpleQueryHandler)
+
+def create_application(config):
+    app = SQEngineApp(SimpleQueryHandler, config=config)
+    return app
