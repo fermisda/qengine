@@ -26,10 +26,16 @@ class SQEngineApp(WPApp):
         WPApp.__init__(self, root_class)
         self.PostgresPools = {}      # connection string -> connection pool
         self.Debug = False
-        self.Cfg = QEConfigFile()
+        self.Cfg = None
+        self.Debug = False
+        self.UseCache = False
+        self.RequestCache = LRUCache(10, ttl=3600)
+
+    def init(self):
+        self.Cfg = QEConfigFile(self.environ("QENGINE_CFG"))
         self.Debug = self.Cfg.Debug
         self.UseCache = self.Cfg.UseCache
-        self.RequestCache = LRUCache(10, ttl=3600)
+
         
     @app_synchronized
     def get_cache(self, key):

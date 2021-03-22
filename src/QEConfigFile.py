@@ -4,7 +4,7 @@ import yaml, os
 
 class QEConfigFile(object):
     def __new__(cls, path=None, envVar='QENGINE_CFG'):
-        path = path or os.environ[envVar]
+        path = path or os.environ.get(envVar)
         if cls is QEConfigFile:
             if path.endswith(".yaml") or path.endswith(".yml"):
                 return super(QEConfigFile, cls).__new__(QEConfigFile_yaml)
