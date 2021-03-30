@@ -4,6 +4,7 @@ from webpie import WPApp, app_synchronized
 
 from SimpleQueryHandler import SimpleQueryHandler
 from QEConfigFile import QEConfigFile
+from LRUCache import LRUCache
 
 import os, sys
 
@@ -11,7 +12,9 @@ from wsdbtools import ConnectionPool
 
 from Version import Version
 
-class LRUCache:
+
+""" comment out
+class __LRUCache:
 
     def __init__(self, maxslots, ttl = None, lowwater = None):
         self._Lock = RLock()
@@ -74,7 +77,7 @@ class LRUCache:
     def clear(self):
         self.Cache = {}
     
-            
+"""            
         
 
 def strftime(dt, fmt):
@@ -93,7 +96,7 @@ class SQEngineApp(WPApp):
         self.Cfg = None
         self.UseCache = False
 
-        config = config or os.environ["QENGINE_CFG"]
+        config = config or os.environ.get("QENGINE_CFG")
 
         self.Cfg = QEConfigFile(config)
         self.Debug = self.Cfg.Debug
@@ -174,16 +177,4 @@ class SQEngineApp(WPApp):
 def create_application(config):
     app = SQEngineApp(SimpleQueryHandler, config=config)
     return app
-from threading import RLock
-import time
-
-def synchronized(method):
-    def smethod(self, *params, **args):
-        self._Lock.acquire()
-        try:    
-            return method(self, *params, **args)
-        finally:
-            self._Lock.release()
-    return smethod
-
 

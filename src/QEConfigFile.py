@@ -20,11 +20,10 @@ class   QEConfigFile_cfg(QEConfigFile):
 
     def __init__(self, path=None, envVar='QENGINE_CFG'):
         self.Cfg = ConfigParser()
-        if not path:
-            path = os.environ[envVar]
-        self.Cfg.read(path)
-        print("QEngine configuration loaded from", path)
+        path = path or os.environ.get(envVar)
+        if not path: return
 
+        self.Cfg.read(path)
         self.DefaultDatabaseName = self.get("Global", "default_db")
         self.DefaultCacheTTL = self.get("Global", "default_cache_ttl", 3600)        
         self.Debug = self.get("Global", "debug", False)
@@ -60,10 +59,12 @@ class   QEConfigFile_cfg(QEConfigFile):
 class QEConfigFile_yaml(QEConfigFile):
 
     def __init__(self, path=None, envVar='QENGINE_CFG'):
-        path = path or os.environ[envVar]
+        path = path or os.environ.get(envVar)
+        config = {}
+        if not path:
+            return
+
         config = yaml.load(open(path, "r"))
-        print("QEngine configuration loaded from", path)
-        
         self.Databases = config["databases"]
         self.DefaultDatabaseName = config.get("default_database")
         self.DefaultCacheTTL = config.get("default_cache_ttl", 3600)
