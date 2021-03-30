@@ -1,5 +1,5 @@
 FILES = InfoHandler.py  SimpleQueryHandler.py  SQEngineApp.py  Version.py \
-     __init__.py     LRUCache.py  QEConfigFile.py  SQBaseHandler.py  
+     __init__.py     LRUCache.py  QEConfigFile.py  SQBaseHandler.py  application.py
 
 all:
 	@echo run make from top directory

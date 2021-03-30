@@ -1,11 +1,8 @@
-VERSION = 6.4
+VERSION = 6.5
 
-BUILDDIR = $(HOME)/build/qengine
+BUILDDIR = $(HOME)/build/QEngine
 TARDIR =  /tmp/$(USER)
-TARFILE = $(TARDIR)/qengine_$(VERSION).tar
-
-
-
+TARFILE = $(TARDIR)/QEngine_$(VERSION).tar
 
 all:    build tarball
 

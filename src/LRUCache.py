@@ -47,7 +47,7 @@ class LRUCache:
         if len(self.Cache) > nkeep:
             lst = list(self.Cache.items())
             # sort by access time in reverse order, latest first
-            lst.sort(lambda x, y: -cmp(x[1][1], y[1][1]))
+            lst.sort(key=lambda x: -x[1][1])
             while lst and len(lst) > nkeep:
                 k, v = lst.pop()
                 del self.Cache[k]
