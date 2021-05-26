@@ -4,7 +4,7 @@ import json, string, re
 Letters = set(string.ascii_letters)
 Digits = set(string.digits)
 Alphanumeric = Letters | Digits
-NameChars = Alphanumeric | set("_")
+NameChars = Alphanumeric | set("_.")
 NumericChars = set("-.+e") | Digits
 
 
@@ -20,6 +20,16 @@ def add_data_origin(method):
         return response
     return decorated_method
 
+class MyJSONEncoder(json.JSONEncoder):
+    
+    def default(self, o):
+        from datetime import datetime, date, time, timedelta
+                    
+        if isinstance(o, (datetime, date, time)):
+            return str(o)
+        elif isinstance(o, timedelta):
+            return o.total_seconds()
+            
 
 
 class SQBaseHandler(WPHandler):
@@ -74,12 +84,12 @@ class SQBaseHandler(WPHandler):
             
     def formatJSON(self, columns, data):
         first_item = True
+        encoder = MyJSONEncoder()
         for row in data:
             prefix = "[" if first_item else ","
             
-            data_dict = {cn:v for cn, v in zip(columns, row)}
-            
-            yield prefix + json.dumps(data_dict)
+            data_dict = {cn:v for cn, v in zip(columns, row)}            
+            yield prefix + encoder.encode(data_dict)
             first_item = False
         if first_item:
             # empty list
