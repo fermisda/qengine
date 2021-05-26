@@ -2,6 +2,7 @@ from SQBaseHandler import SQBaseHandler, add_data_origin
 from InfoHandler import InfoHandler
 from urllib.parse import unquote
 import time, sys, json
+from psycopg2.extras import DictCursor
 
 from webpie import WPHandler, Response, webmethod
 
@@ -110,7 +111,7 @@ class SimpleQueryHandler(SQBaseHandler):
             
         orders = []
         for o in req.params.getall('o'):
-            print("o:", o)
+            #print("o:", o)
             self.check_for_injunction(o)
             for o in o.split(','):
                 o = o.strip()
@@ -126,11 +127,12 @@ class SimpleQueryHandler(SQBaseHandler):
             
         limit = req.params.get('l', None)
         if limit:
-            self.check_for_injunction(limit)
-            self.validate_number(o[1:])
-            sql  += " limit %s " % (limit,)
+            try:    limit = int(limit)
+            except:
+                raise ValueError(f"Invadid value for l:{limit}")
+            sql  += f" limit {limit} "
         sql = str(sql)
-        print(sql)
+        #print(sql)
         return sql, aliases   
 
     
@@ -163,6 +165,7 @@ class SimpleQueryHandler(SQBaseHandler):
         #---- function call ----
         # F=function name
         # a=arg1&a=arg2...
+        # f=csv|json
         #
         conn = self.App.connect(dbname)
         #print "Using connection %x" % (id(conn),)
@@ -192,7 +195,7 @@ class SimpleQueryHandler(SQBaseHandler):
             #print "Not in cache: "+query
             #print "sql: <%s>" % (sql,)
             c.execute(sql)
-            if not columns: columns = [x[0] for x in c.description]
+            columns = [x[0] for x in c.description]
             data = self.cursorIterator(c)
             if use_cache:
                 data = list(data)
@@ -200,8 +203,11 @@ class SimpleQueryHandler(SQBaseHandler):
         else:
             pass
         quote_strings = self.getDBParams().get("quote_strings", False)
-        output = self.mergeLines(self.formatCSV(columns, data, quote_strings))
-        resp = Response(app_iter = output, content_type = 'text/csv')
+        if f == "csv":
+            output = self.mergeLines(self.formatCSV(columns, data, quote_strings))
+        else:
+            output = self.mergeLines(self.formatJSON(columns, data))
+        resp = Response(app_iter = output, content_type = f'text/{f}')
         
         if cache_ttl is None:
             cache_ttl = self.App.cacheTTL(dbname, table_or_func) or 0

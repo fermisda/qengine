@@ -71,6 +71,21 @@ class SQBaseHandler(WPHandler):
         for tup in data:
             #output.append('%s\n' % (','.join(['%s' % (x,) for x in tup]),))
             yield ('%s\n' % (','.join([quote(x) for x in tup]),))
+            
+    def formatJSON(self, columns, data):
+        first_item = True
+        for row in data:
+            prefix = "[" if first_item else ","
+            
+            data_dict = {cn:v for cn, v in zip(columns, row)}
+            
+            yield prefix + json.dumps(data_dict)
+            first_item = False
+        if first_item:
+            # empty list
+            yield "[]"
+        else:
+            yield "]"
 
     def mergeLines(self, iter, maxlen=10000):
         buf = []
