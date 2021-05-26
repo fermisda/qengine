@@ -54,12 +54,15 @@ class SimpleQueryHandler(SQBaseHandler):
         if req.params.get('t'):
             table = req.params["t"]
             self.check_for_injunction(table)
+            self.validate_name(table)
         elif req.params.get('F'):
             function = req.params["F"]
             self.check_for_injunction(function)
+            self.validate_name(function)
             args = []
             for a in req.params.getall('a'):
                 self.check_for_injunction(a)
+                self.validate_value(a)
                 args.append("'%s'" % (a,))
             table = "%s(%s)" % (function, ','.join(args))
         else:
@@ -74,7 +77,9 @@ class SimpleQueryHandler(SQBaseHandler):
         aliases = columns[:]
         if not columns: columns = ['*']
         for c in columns:
-            self.check_for_injunction(c)
+            if c != '*':
+                self.check_for_injunction(c)
+                self.validate_name(c)
                 
         columns = [self.JSONPath(c) for c in columns]
         
@@ -97,21 +102,24 @@ class SimpleQueryHandler(SQBaseHandler):
                 sign = '='
                 v = rest
 
-                        
             self.check_for_injunction(v)
+            self.validate_value(v)
             wheres.append("%s %s '%s'" % (c, sign, v))
         if wheres:
             sql += "where %s " % (' and '.join(wheres))
             
         orders = []
         for o in req.params.getall('o'):
+            print("o:", o)
             self.check_for_injunction(o)
             for o in o.split(','):
                 o = o.strip()
                 desc = o[0] == '-'
                 if desc:
+                    self.validate_name(o[1:])
                     orders.append(o[1:] + ' desc')
                 else:
+                    self.validate_name(o)
                     orders.append(o)
         if orders:
             sql += "order by " + ','.join(orders)
@@ -119,8 +127,10 @@ class SimpleQueryHandler(SQBaseHandler):
         limit = req.params.get('l', None)
         if limit:
             self.check_for_injunction(limit)
+            self.validate_number(o[1:])
             sql  += " limit %s " % (limit,)
         sql = str(sql)
+        print(sql)
         return sql, aliases   
 
     
@@ -158,7 +168,11 @@ class SimpleQueryHandler(SQBaseHandler):
         #print "Using connection %x" % (id(conn),)
         c = conn.cursor()
         table_or_func = t or F
-        sql, columns = self.buildSQL(req)
+        try:
+            sql, columns = self.buildSQL(req)
+        except ValueError as e:
+            print("Error building SQL:", e)
+            return "Bad arguments", 400
         #print "sql=<%s>" % (sql,)
         #print "columns=", columns
         data = None

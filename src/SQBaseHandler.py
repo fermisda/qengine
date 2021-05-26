@@ -1,5 +1,13 @@
 from webpie import WPHandler
-import json
+import json, string, re
+
+Letters = set(string.ascii_letters)
+Digits = set(string.digits)
+Alphanumeric = Letters | Digits
+NameChars = Alphanumeric | set("_")
+NumericChars = set("-.+e") | Digits
+
+
 
 def add_data_origin(method):
     def decorated_method(self, req, *params, **args):
@@ -26,8 +34,23 @@ class SQBaseHandler(WPHandler):
         return self.App.getDBParams(dbn = dbname)
 
     def check_for_injunction(self, s):
-        if s.find(';') >= 0 or s.find("'") >= 0:
+        if "'" in s:
             raise ValueError("Possible SQL injunction attempt: \"%s\"" % (s,))
+            
+    def validate_name(self, s):
+        for c in s:
+            if not c in NameChars:
+                raise ValueError("Possible SQL injunction attempt: name: \"%s\"" % (s,))
+        return True
+        
+    def validate_value(self, s):
+        if "'" in s or '\n' in s:    raise ValueError("Possible SQL injunction attempt: value: \"%s\"" % (s,))
+        return True
+
+    def validate_number(self, s):
+        for c in s:
+            if not c in NumericChars: raise ValueError("Possible SQL injunction attempt: number: \"%s\"" % (s,))
+        return True
 
     def formatCSV(self, columns, data, quote_strings):
         def quote(x):

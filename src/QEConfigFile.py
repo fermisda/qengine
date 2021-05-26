@@ -64,7 +64,7 @@ class QEConfigFile_yaml(QEConfigFile):
         if not path:
             return
 
-        config = yaml.load(open(path, "r"))
+        config = yaml.load(open(path, "r"), Loader=yaml.SafeLoader)
         self.Databases = config["databases"]
         self.DefaultDatabaseName = config.get("default_database")
         self.DefaultCacheTTL = config.get("default_cache_ttl", 3600)
