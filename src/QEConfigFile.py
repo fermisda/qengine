@@ -86,5 +86,6 @@ class QEConfigFile_yaml(QEConfigFile):
         dbparams = self.getDBParams(dbname)
         default_ttl = dbparams.get("default_cache_ttl", self.DefaultCacheTTL)
         cache_ttl_per_table_or_function = dbparams.get("cache_ttl", {})
+        assert isinstance(cache_ttl_per_table_or_function, dict)
         cache_ttl = cache_ttl_per_table_or_function.get(table, default_ttl)
         return cache_ttl
