@@ -147,8 +147,6 @@ class SimpleQueryHandler(SQBaseHandler):
             return "OK"
         else:
             return 500
-        
-
 
     @webmethod()
     def query(self, req, relpath, dbname=None, x='no', f='csv', t=None, F=None, cache_ttl=None, **args):

@@ -45,21 +45,30 @@ class SQBaseHandler(WPHandler):
 
     def check_for_injunction(self, s):
         if "'" in s:
-            raise ValueError("Possible SQL injunction attempt: \"%s\"" % (s,))
+            raise ValueError("Possible SQL injunction attempt")
             
     def validate_name(self, s):
         for c in s:
-            if not c in NameChars:
-                raise ValueError("Possible SQL injunction attempt: name: \"%s\"" % (s,))
+            if c not in NameChars:
+                raise ValueError("Invalid name or namespace")
+        words = s.split('.')
+        namespace, name = None, s
+        if len(words) not in (1,2):
+            raise ValueError("Invalid namespace.name")
+        if len(words) == 2:
+            namespace, name = words
+        if namespace and \
+                (namespace.startswith("pg_") or namespace == "information_schema"):
+            raise ValueError("Invalid namespace")
         return True
         
     def validate_value(self, s):
-        if "'" in s or '\n' in s:    raise ValueError("Possible SQL injunction attempt: value: \"%s\"" % (s,))
+        if "'" in s or '\n' in s:    raise ValueError("Invalid value")
         return True
 
     def validate_number(self, s):
         for c in s:
-            if not c in NumericChars: raise ValueError("Possible SQL injunction attempt: number: \"%s\"" % (s,))
+            if not c in NumericChars: raise ValueError("Invalid number")
         return True
 
     def formatCSV(self, columns, data, quote_strings):
