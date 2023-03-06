@@ -1,4 +1,4 @@
-VERSION = 6.5
+VERSION = 6.7
 
 BUILDDIR = $(HOME)/build/QEngine
 TARDIR =  /tmp/$(USER)
