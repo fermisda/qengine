@@ -16,7 +16,7 @@ class SimpleQueryHandler(SQBaseHandler):
         SQBaseHandler.__init__(self, *params)
         self.I = InfoHandler(*params)
 
-            
+
     def cursorIterator(self, c):
         tup = c.fetchone()
         while tup:
@@ -30,7 +30,7 @@ class SimpleQueryHandler(SQBaseHandler):
             path = cwords[0]
             for cw in cwords[1:]:
                 path += "->'%s'" % (cw,)
-            column = path    
+            column = path
         return column
 
     Ops = {
@@ -45,7 +45,7 @@ class SimpleQueryHandler(SQBaseHandler):
     @webmethod()
     def version(self, req, relpath, **args):
         return Response(self.App.Version, content_type="text/plain")
-        
+
     @webmethod()
     def env(self, req, relpath, **args):
         text = ''.join(["%s = %s\n" % (k, v) for k, v in sorted(req.environ.items())])
@@ -54,46 +54,46 @@ class SimpleQueryHandler(SQBaseHandler):
     def buildSQL(self, req):
         if req.params.get('t'):
             table = req.params["t"]
-            self.check_for_injunction(table)
+            self.check_for_injection(table)
             self.validate_name(table)
         elif req.params.get('F'):
             function = req.params["F"]
-            self.check_for_injunction(function)
+            self.check_for_injection(function)
             self.validate_name(function)
             args = []
             for a in req.params.getall('a'):
-                self.check_for_injunction(a)
+                self.check_for_injection(a)
                 self.validate_value(a)
                 args.append("'%s'" % (a,))
             table = "%s(%s)" % (function, ','.join(args))
         else:
             raise ValueError("Either table name or function name must be specified")
-            
+
         columns = req.params.get('c', None)
         if columns:
             columns = columns.split(',')
         else:
             columns = []
-        
+
         aliases = columns[:]
         if not columns: columns = ['*']
         for c in columns:
             if c != '*':
-                self.check_for_injunction(c)
+                self.check_for_injection(c)
                 self.validate_name(c)
-                
+
         columns = [self.JSONPath(c) for c in columns]
-        
+
         sql = "select %s from %s " % (','.join(columns), table)
-        
+
         wheres = []
-        
+
         for w in req.params.getall('w'):
             q = unquote(w)
             words = q.split(':', 1)
             c = words[0]
             rest = words[1]
-            self.check_for_injunction(c)
+            self.check_for_injection(c)
             c = self.JSONPath(c)
             words = rest.split(':', 1)
             if len(words) == 2 and words[0] in self.Ops:
@@ -103,16 +103,16 @@ class SimpleQueryHandler(SQBaseHandler):
                 sign = '='
                 v = rest
 
-            self.check_for_injunction(v)
+            self.check_for_injection(v)
             self.validate_value(v)
             wheres.append("%s %s '%s'" % (c, sign, v))
         if wheres:
             sql += "where %s " % (' and '.join(wheres))
-            
+
         orders = []
         for o in req.params.getall('o'):
             #print("o:", o)
-            self.check_for_injunction(o)
+            self.check_for_injection(o)
             for o in o.split(','):
                 o = o.strip()
                 desc = o[0] == '-'
@@ -124,7 +124,7 @@ class SimpleQueryHandler(SQBaseHandler):
                     orders.append(o)
         if orders:
             sql += "order by " + ','.join(orders)
-            
+
         limit = req.params.get('l', None)
         if limit:
             try:    limit = int(limit)
@@ -133,9 +133,9 @@ class SimpleQueryHandler(SQBaseHandler):
             sql  += f" limit {limit} "
         sql = str(sql)
         #print(sql)
-        return sql, aliases   
+        return sql, aliases
 
-    
+
 
     @webmethod()
     def probe(self, req, relpath, dbname=None, **args):
@@ -206,18 +206,18 @@ class SimpleQueryHandler(SQBaseHandler):
         else:
             output = self.mergeLines(self.formatJSON(columns, data))
         resp = Response(app_iter = output, content_type = f'text/{f}')
-        
+
         if cache_ttl is None:
             cache_ttl = self.App.cacheTTL(dbname, table_or_func) or 0
         else:
             cache_ttl = int(cache_ttl)
         resp.cache_expires(cache_ttl)
-        return resp            
-        
+        return resp
+
     @webmethod()
     def flush(self, req, relpath, **args):
         self.App.clear_cache()
         return Response("OK")
-        
+
 
 

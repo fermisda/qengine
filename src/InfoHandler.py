@@ -8,14 +8,14 @@ class InfoHandler(SQBaseHandler):
     @add_data_origin
     def columns(self, req, relpath, dbname=None, t=None, f="json", **args):
         # postgres version
-        self.check_for_injunction(t or "")
+        self.check_for_injection(t or "")
         conn = self.App.connect(dbname)
         nspace = 'public'
         if '.' in t:
             nspace, t = tuple(t.split('.',1))
         f = args.get("f", "json")
         columns = DbDig(conn, "Postgres").columns(nspace, t)
-        
+
         if f == "csv":
             cnames = ["column", "type"]
             cols = [(c,t) for c, t, m, n, d in columns]
@@ -34,13 +34,13 @@ class InfoHandler(SQBaseHandler):
                 })
             resp = Response(json.dumps(lst), content_type='text/plain')
             return resp
-            
-    @add_data_origin   
+
+    @add_data_origin
     def tables(self, req, relpath, ns="public", dbname=None, f="json", **args):
         # postgres version
         conn = self.App.connect(dbname)
         nspace = ns
-        self.check_for_injunction(ns)
+        self.check_for_injection(ns)
         tables = DbDig(conn, "Postgres").tables(nspace)
         if f == 'csv':
             tuples = [(t,) for t in tables]
@@ -50,9 +50,9 @@ class InfoHandler(SQBaseHandler):
         else:
             resp = Response(json.dumps(tables), content_type='text/plain')
             return resp
-                
-        
-        
 
-        
-        
+
+
+
+
+

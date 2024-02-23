@@ -13,23 +13,23 @@ def add_data_origin(method):
     def decorated_method(self, req, *params, **args):
         response = method(self, req, *params, **args)
         env = req.environ
-        host = env.get("SERVER_NAME")  
-        port = env.get("SERVER_PORT")  
+        host = env.get("SERVER_NAME")
+        port = env.get("SERVER_PORT")
         if host and port:
             response.headers["X-Data-Origin"] = host + ":" + port
         return response
     return decorated_method
 
 class MyJSONEncoder(json.JSONEncoder):
-    
+
     def default(self, o):
         from datetime import datetime, date, time, timedelta
-                    
+
         if isinstance(o, (datetime, date, time)):
             return str(o)
         elif isinstance(o, timedelta):
             return o.total_seconds()
-            
+
 
 
 class SQBaseHandler(WPHandler):
@@ -43,10 +43,10 @@ class SQBaseHandler(WPHandler):
     def getDBParams(self, dbname = None):
         return self.App.getDBParams(dbn = dbname)
 
-    def check_for_injunction(self, s):
+    def check_for_injection(self, s):
         if "'" in s:
-            raise ValueError("Possible SQL injunction attempt")
-            
+            raise ValueError("Possible SQL injection attempt")
+
     def validate_name(self, s):
         for c in s:
             if c not in NameChars:
@@ -61,7 +61,7 @@ class SQBaseHandler(WPHandler):
                 (namespace.startswith("pg_") or namespace == "information_schema"):
             raise ValueError("Invalid namespace")
         return True
-        
+
     def validate_value(self, s):
         if "'" in s or '\n' in s:    raise ValueError("Invalid value")
         return True
@@ -90,14 +90,14 @@ class SQBaseHandler(WPHandler):
         for tup in data:
             #output.append('%s\n' % (','.join(['%s' % (x,) for x in tup]),))
             yield ('%s\n' % (','.join([quote(x) for x in tup]),))
-            
+
     def formatJSON(self, columns, data):
         first_item = True
         encoder = MyJSONEncoder()
         for row in data:
             prefix = "[" if first_item else ","
-            
-            data_dict = {cn:v for cn, v in zip(columns, row)}            
+
+            data_dict = {cn:v for cn, v in zip(columns, row)}
             yield prefix + encoder.encode(data_dict)
             first_item = False
         if first_item:
