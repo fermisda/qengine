@@ -178,3 +178,15 @@ def create_application(config):
     app = SQEngineApp(SimpleQueryHandler, config=config)
     return app
 
+if __name__ == "__main__":
+    import sys, getopt
+    opts, args = getopt.getopt(sys.argv[1:], "c:p:")
+    opts = dict(opts)
+    config = opts.get("-c")
+    if config:
+        print("Using config file:", config)
+    port = int(opts.get("-p", 8888))
+    print(f"Starting HTTP server at port {port}...")
+    application = create_application(config)
+    application.run_server(port)
+
