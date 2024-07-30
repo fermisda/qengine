@@ -27,9 +27,9 @@ class __LRUCache:
     def setTTL(self, ttl):
         self.TTL = ttl
 
-    @synchronized        
+    @synchronized
     def get(self, k):
-        if k not in self.Cache:   
+        if k not in self.Cache:
             #print "key %s not found" % (k,)
             return None
         tc, ta, data = self.Cache[k]
@@ -40,10 +40,10 @@ class __LRUCache:
             return None
         self.Cache[k] = (tc, now, data)
         return data
-        
+
     __getitem__ = get
-    
-    @synchronized        
+
+    @synchronized
     def purge(self):
         nkeep = self.LowWater
         if nkeep == None:   nkeep = self.MaxSlots
@@ -54,31 +54,31 @@ class __LRUCache:
             while lst and len(lst) > nkeep:
                 k, v = lst.pop()
                 del self.Cache[k]
-        
-    @synchronized        
+
+    @synchronized
     def put(self, k, data):
         now = time.time()
         self.Cache[k] = (now, now, data)
         self.purge()
-        
+
     __setitem__ = put
-    
-    @synchronized        
+
+    @synchronized
     def remove(self, k):
         try:    del self.Cache[k]
         except KeyError:    pass
-        
+
     __delitem__ = remove
-    
+
     def keys(self):
         return list(self.Cache.keys())
-        
-    @synchronized        
+
+    @synchronized
     def clear(self):
         self.Cache = {}
-    
-"""            
-        
+
+"""
+
 
 def strftime(dt, fmt):
     return dt.strftime(fmt)
@@ -103,22 +103,22 @@ class SQEngineApp(WPApp):
         self.UseCache = self.Cfg.UseCache
 
 
-        
+
     def init(self):
         pass
 
     @app_synchronized
     def get_cache(self, key):
         return self.RequestCache[key]
-        
+
     @app_synchronized
     def clear_cache(self, key):
         return self.RequestCache.clear()
-        
+
     @app_synchronized
     def put_cache(self, key, data):
         self.RequestCache[key] = data
-        
+
     @app_synchronized
     def getPostgresPool(self, connstr):
         pool = self.PostgresPools.get(connstr)
@@ -170,14 +170,17 @@ class SQEngineApp(WPApp):
 
     def cacheTTL(self, dbname, table):
         return self.Cfg.cacheTTL(dbname, table)
-        
-    
+
+
 #application = SQEngineApp(SimpleQueryHandler)
 
 def create_application(config):
     app = SQEngineApp(SimpleQueryHandler, config=config)
     return app
 
+# In case you want to run this standalone.
+# You will need to define soft links to pythreader, webpie and wsdbtools source directories, or the build area.  And you will
+# need to supply a config file.
 if __name__ == "__main__":
     import sys, getopt
     opts, args = getopt.getopt(sys.argv[1:], "c:p:")
@@ -189,4 +192,3 @@ if __name__ == "__main__":
     print(f"Starting HTTP server at port {port}...")
     application = create_application(config)
     application.run_server(port)
-
